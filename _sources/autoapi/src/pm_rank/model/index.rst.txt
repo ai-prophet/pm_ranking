@@ -1,0 +1,277 @@
+src.pm_rank.model
+=================
+
+.. py:module:: src.pm_rank.model
+
+.. autoapi-nested-parse::
+
+   Model subpackage for pm_rank.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/src/pm_rank/model/average_return/index
+   /autoapi/src/pm_rank/model/bradley_terry/index
+   /autoapi/src/pm_rank/model/irt/index
+   /autoapi/src/pm_rank/model/scoring_rule/index
+   /autoapi/src/pm_rank/model/utils/index
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   src.pm_rank.model.GeneralizedBT
+   src.pm_rank.model.BrierScoringRule
+   src.pm_rank.model.SphericalScoringRule
+   src.pm_rank.model.LogScoringRule
+   src.pm_rank.model.AverageReturn
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   src.pm_rank.model.spearman_correlation
+   src.pm_rank.model.kendall_correlation
+
+
+Package Contents
+----------------
+
+.. py:class:: GeneralizedBT(method: Literal['MM', 'Elo'] = 'MM', num_iter: int = 100, threshold: float = 0.001, verbose: bool = False)
+
+   Bases: :py:obj:`object`
+
+
+   Generalized Bradley-Terry model for ranking forecasters in prediction markets.
+
+   This class implements a generalization of the traditional Bradley-Terry model to
+   handle prediction market scenarios. Each event outcome is treated as a contest
+   between two "pseudo-teams": a winning team (the realized outcome) and a losing
+   team (all other outcomes). Each forecaster contributes fractions of their capability
+   proportional to their predicted probabilities.
+
+   The model estimates skill parameters for each forecaster using an iterative
+   Majorization-Minimization (MM) algorithm, which provides convergence guarantees
+   and intuitive comparative scores similar to Elo ratings.
+
+   :param method: Optimization method to use ("MM" for Majorization-Minimization).
+   :param num_iter: Maximum number of iterations for the MM algorithm (default: 100).
+   :param threshold: Convergence threshold for parameter updates (default: 1e-3).
+   :param verbose: Whether to enable verbose logging (default: False).
+
+   Initialize the generalized Bradley-Terry model.
+
+   :param method: Optimization method to use ("MM" for Majorization-Minimization).
+   :param num_iter: Maximum number of iterations for the MM algorithm (default: 100).
+   :param threshold: Convergence threshold for parameter updates (default: 1e-3).
+   :param verbose: Whether to enable verbose logging (default: False).
+
+
+   .. py:attribute:: method
+      :value: 'MM'
+
+
+
+   .. py:attribute:: num_iter
+      :value: 100
+
+
+
+   .. py:attribute:: threshold
+      :value: 0.001
+
+
+
+   .. py:attribute:: verbose
+      :value: False
+
+
+
+   .. py:attribute:: logger
+
+
+   .. py:method:: fit(problems: List[pm_rank.data.base.ForecastProblem], include_scores: bool = True) -> Tuple[Dict[str, Any], Dict[str, int]] | Dict[str, int]
+
+      Fit the generalized Bradley-Terry model to the given problems.
+
+      This method estimates skill parameters for each forecaster using the MM algorithm
+      and returns rankings based on these parameters. The skill parameters represent
+      the relative predictive ability of each forecaster.
+
+      :param problems: List of ForecastProblem instances to evaluate.
+      :param include_scores: Whether to include scores in the results (default: True).
+
+      :returns: Ranking results, either as a tuple of (scores, rankings) or just rankings.
+
+
+
+.. py:class:: BrierScoringRule(negate: bool = True, verbose: bool = False)
+
+   Bases: :py:obj:`ScoringRule`
+
+
+   Brier scoring rule for evaluating probabilistic forecasts.
+
+   The Brier score is a quadratic proper scoring rule that measures the squared
+   difference between predicted probabilities and actual outcomes. It is widely
+   used in prediction markets and provides a good balance between rewarding
+   accuracy and calibration.
+
+   :param negate: Whether to negate the scores so that higher values are better
+                  (default: True).
+   :param verbose: Whether to enable verbose logging (default: False).
+
+   Initialize the Brier scoring rule.
+
+   :param negate: Whether to negate the scores so that higher values are better
+                  (default: True).
+   :param verbose: Whether to enable verbose logging (default: False).
+
+
+   .. py:attribute:: negate
+      :value: True
+
+
+
+.. py:class:: SphericalScoringRule(verbose: bool = False)
+
+   Bases: :py:obj:`ScoringRule`
+
+
+   Spherical scoring rule for evaluating probabilistic forecasts.
+
+   The spherical scoring rule normalizes probability vectors to unit vectors and
+   measures the cosine similarity with the actual outcome. This rule is less
+   sensitive to extreme probability values compared to the logarithmic rule.
+
+   :param verbose: Whether to enable verbose logging (default: False).
+
+   Initialize the spherical scoring rule.
+
+   :param verbose: Whether to enable verbose logging (default: False).
+
+
+.. py:class:: LogScoringRule(clip_prob: float = 0.01, verbose: bool = False)
+
+   Bases: :py:obj:`ScoringRule`
+
+
+   Logarithmic scoring rule for evaluating probabilistic forecasts.
+
+   The logarithmic scoring rule is a proper scoring rule that rewards forecasters
+   based on the logarithm of their predicted probability for the actual outcome.
+   This rule heavily penalizes overconfident predictions and rewards well-calibrated
+   forecasts.
+
+   :param clip_prob: Minimum probability value to prevent log(0) (default: 0.01).
+   :param verbose: Whether to enable verbose logging (default: False).
+
+   Initialize the logarithmic scoring rule.
+
+   :param clip_prob: Minimum probability value to prevent log(0) (default: 0.01).
+   :param verbose: Whether to enable verbose logging (default: False).
+
+
+   .. py:attribute:: clip_prob
+      :value: 0.01
+
+
+
+.. py:class:: AverageReturn(num_money_per_round: int = 1, risk_aversion: float = 0.0, verbose: bool = False)
+
+   Average Return Model for ranking forecasters based on their expected market returns.
+
+   This class implements a ranking algorithm that evaluates forecasters based on how much
+   money they could earn from prediction markets using different risk aversion strategies.
+   The model calculates expected returns for each forecaster and ranks them accordingly.
+
+   Initialize the AverageReturn model.
+
+   :param num_money_per_round: Amount of money to bet per round (default: 1).
+   :param risk_aversion: Risk aversion parameter between 0 and 1 (default: 0.0).
+   :param verbose: Whether to enable verbose logging (default: False).
+
+   :raises AssertionError: If risk_aversion is not between 0 and 1.
+
+
+   .. py:attribute:: num_money_per_round
+      :value: 1
+
+
+
+   .. py:attribute:: risk_aversion
+      :value: 0.0
+
+
+
+   .. py:attribute:: verbose
+      :value: False
+
+
+
+   .. py:attribute:: logger
+
+
+   .. py:method:: fit(problems: List[pm_rank.data.base.ForecastProblem], include_scores: bool = True) -> Tuple[Dict[str, Any], Dict[str, int]] | Dict[str, int]
+
+      Fit the average return model to the given problems.
+
+      This method processes all problems at once and returns the final rankings
+      based on average returns across all problems.
+
+      :param problems: List of ForecastProblem instances to process.
+      :param include_scores: Whether to include scores in the results (default: True).
+
+      :returns: Ranking results, either as a tuple of (scores, rankings) or just rankings.
+
+
+
+   .. py:method:: fit_stream(problem_iter: Iterator[List[pm_rank.data.base.ForecastProblem]], include_scores: bool = True) -> Dict[int, Tuple[Dict[str, Any], Dict[str, int]] | Dict[str, int]]
+
+      Fit the model to streaming problems and return incremental results.
+
+      This method processes problems as they arrive and returns rankings after each batch,
+      allowing for incremental analysis of forecaster performance.
+
+      :param problem_iter: Iterator over batches of ForecastProblem instances.
+      :param include_scores: Whether to include scores in the results (default: True).
+
+      :returns: Mapping of batch indices to ranking results.
+
+
+
+   .. py:method:: fit_stream_with_timestamp(problem_time_iter: Iterator[Tuple[str, List[pm_rank.data.base.ForecastProblem]]], include_scores: bool = True) -> collections.OrderedDict
+
+      Fit the model to streaming problems with timestamps and return incremental results.
+
+      This method processes problems with associated timestamps and returns rankings
+      after each batch, maintaining chronological order.
+
+      :param problem_time_iter: Iterator over (timestamp, problems) tuples.
+      :param include_scores: Whether to include scores in the results (default: True).
+
+      :returns: Chronologically ordered mapping of timestamps to ranking results.
+
+
+
+.. py:function:: spearman_correlation(rank_dict_a: Dict[str, int], rank_dict_b: Dict[str, int]) -> float
+
+   Compute the Spearman correlation between two rankings.
+   Reference: https://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient
+
+
+.. py:function:: kendall_correlation(rank_dict_a: Dict[str, int], rank_dict_b: Dict[str, int]) -> float
+
+   Compute the Kendall correlation between two rankings.
+   Reference: https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient
+
+
