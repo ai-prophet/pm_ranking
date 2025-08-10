@@ -1,13 +1,13 @@
-# How We Score & Rank LLMs in Prediction Markets
+# How We Score & Rank LLMs in Prophet Arena
 
 > **Author:** Sida Li, Prophet Arena Team
 >
-> **Date:** August 1st, 2025
+> **Date:** August 10, 2025
 >
-> **Estimated Reading Time:** 9 minutes
+> **Estimated Reading Time:** 10 minutes
 ---
 
-Creating benchmarks and arenas to evaluate large language models (LLMs) is often a labor-intensive and meticulous process. However, when it comes to the metrics used for evaluation, the guiding principle is usually to find a straightforward and intuitive scoring methods for a given task. For example, in problems involving pairwise comparisons ("Which LLM answers better?"), the Elo rating system offers a clean and elegant solution. Likewise, for benchmarks focused on verifiable, objective answers, the evaluation can be as simple as averaging binary correctness across all problems to yield an accuracy metric.
+Creating benchmarks and arenas to evaluate large language models (LLMs) is often a labor-intensive and meticulous process. However, when it comes to the metrics used for evaluation, the guiding principle is usually to find a straightforward and intuitive scoring methods for a given task. For example, in problems involving pairwise comparisons ("Which LLM answers better?"), the [Elo rating system](https://en.wikipedia.org/wiki/Elo_rating_system) offers a clean and elegant solution. Likewise, for benchmarks focused on verifiable, objective answers, the evaluation can be as simple as averaging binary correctness across all problems to yield an accuracy metric.
 
 However, the question of **how to score and rank LLMs based on their probabilistic predictions** introduces more complexity and nuance. Choosing the right metrics becomes a non-trivial yet intriguing challenge. One distinctive strength of our platform, `ProphetArena`, lies precisely in our comprehensive scoring and ranking module. This module implements diverse, principled metrics inspired by statistical modeling, utility theory, and psychometrics.
 
@@ -42,11 +42,11 @@ BS_i \equiv \text{Brier Score for } E_i = \frac{1}{n_i} \sum_{k=1}^{n_i}(p_{ik} 
 
 where $o_{ik}$ is 1 if outcome $k$ occurred, and 0 otherwise. This metric provides a clean numeric score between 0 and 1, with lower scores indicating better accuracy and calibration. 
 
-<details>
-<summary>🔍 <b>Remark</b> for careful readers</summary>
 
-In the setup above (and the rest of the post), we considered a **simplified setting** where all the potential outcomes (or `markets`) in an event are _mutually exclusive_. While this assumption holds naturally in certain cases (e.g. sports betting on which team will win the championship), it can be seriously violated in other cases (e.g. the markets "Bitcoin price will be above $100,000" and "Bitcoin price will be above $100,500" are actually highly correlated). Fortunately, even in the general case, the Brier score can generalize easily, but other metrics mentioned below might require extra approximation or adaptation. We will detail the generalized version of our scoring/ranking methods in the upcoming paper.
-</details>
+> 🔍 **Remark for careful readers**
+>
+> In the setup above (and the rest of the post), we considered a **simplified setting** where all the potential outcomes (or `markets`) in an event are _mutually exclusive_. While this assumption holds naturally in certain cases (e.g. sports betting on which team will win the championship), it can be seriously violated in other cases (e.g. the markets "Bitcoin price will be above 100k dollars" and "Bitcoin price will be above 101k dollars" are actually highly correlated). Fortunately, even in the general case, the Brier score can generalize easily, but other metrics mentioned below might require extra approximation or adaptation. We will detail the generalized version of our scoring/ranking methods in the upcoming paper.
+
 
 The final (averaged) Brier score is then calculated across all events:
 
@@ -67,6 +67,10 @@ While the Brier score serves as our default scoring method due to its interpreta
 ## Averaged Return: what practitioners might care about
 
 In real-world prediction markets, practitioners care deeply about **actionable insights**—specifically, how much money one could earn by faithfully following an LLM’s probabilistic predictions. However, LLMs only provide probabilistic estimates rather than direct recommendations for betting actions. Turning these estimates into concrete actions typically involves comparing the LLM's belief (probability) against market-implied probabilities.
+
+> 🔍 **Remark for careful readers**
+>
+> Here we once again introduce the metric under our **simplified setting** where all the potential outcomes (or `markets`) in an event are _mutually exclusive_. To understand the details and math formulations behind the generic algorithm, which is what we implement in the `pm_rank` package, please refer to the [our technical document](../_static/technical_doc.pdf).
 
 To address this, we've introduced a novel approach rooted in **constant-relative-risk-aversion (CRRA) utility theory**. Specifically, we assume a hypothetical scenario where a human fully trusts the LLM’s probabilities as their true beliefs and makes decisions guided solely by their personal risk aversion, captured by the CRRA utility function:
 
@@ -118,23 +122,34 @@ It is now the right time to reflect and compare the two important metrics introd
 
 - On the other hand, the averaged return depends on the observed outcome and the strategy $a_i^*$, which in turn is determined by **both the LLM's probabilities and the market odds**. It is thus a **relative metric** in the sense that achieving a good score requires the LLM to perform "relatively better" than most human bettors to create arbitrage opportunities.
 
-<br>
-<details>
-<summary>🤔 Follow-up: when would rankings based on these two metrics differ?</summary>
+### 🤔 Example: When Would Absolute and Relative Metrics Differ?
 
-Imagine the following stylized setup: 
+Suppose we bet on a single event with binary outcomes, with ground-truth probability of “Yes” being 0.6 (for the event to be realized), and prediction market price 0.5. Consider two different probabilistic predictions of this event’s “Yes” realization: A predicts 0.45 and B predicts 0.9.   
 
-- There are two LLMs, $A$ and $B$, and all events fall under two categories, `finance` and `sports` (50-50 proportion).
-- For human market, it is relatively more "predictable" in the `sports` category, while the `finance` events require more information aggregation and are thus harder to predict.
-- For LLM $A$, it is substantially better at predicting the `sports` events than $B$, while it is slightly worse at predicting the `finance` events.
-- Now, LLM $A$ will have better Brier score than $B$ because overall it has better predictive capabilities in the **absolute sense** (ignoring market odds).
-- However, if we consider the averaged return score, we will find that LLM $B$ will have a better score than $A$ because it is able to make more money in the `finance` events where humans are more inferior at. Despite its strong predictive capabilities in the `sports` events, LLM $A$ is not able to create arbitrage opportunities there since humans are also very good at these problems.
+The expected Brier Score of A is 
 
+$$
+1 - 0.6 \cdot (0.45−1)^2 + 0.4 \cdot (0.45−0)^2 = 1 - 0.2625 = 0.7375
+$$   
 
+The expected Brier Score of B is 
 
-</details>
+$$
+1 - 0.6 \cdot (0.9 - 1)^2 + 0.4 \cdot (0.9−0)^2 = 1 - 0.33 = 0.67
+$$   
 
+So A has a higher Brier Score. However, because A predicts 0.45, lower than the 0.5 prediction market price, hence A will short “Yes” (or equivalently, buy “No”) at 0.5. Meanwhile, B predicts 0.9, much higher than the prediction market price, hence they will buy “Yes.” Respectively, A and B’s expected return will be 
 
+$$
+\begin{align*}
+0.6 \cdot (−1+0.5) + 0.4 \cdot (0.5) &= −0.1 \\
+0.6 \cdot (1−0.5) + 0.4 \cdot (−0.5) &= 0.1
+\end{align*}
+$$
+
+In this example, A has a higher Brier Score, but lower returns. 
+
+This example uncovers a key difference between the above two metrics. The Brier Score measures how close a prediction is to the ground truth and, importantly, has nothing to do with the market prices. Since A’s prediction above is closer to the ground truth, it receives a higher Brier Score. However, returns on the market are not only driven by the true probability but also the market price. Therefore, even though B’s prediction is exaggerated, it lies on the correct side of the market mispricing (buys “Yes” when outcome is more likely than price suggests), achieving higher returns.   
 
 ## IRT & Bradley-Terry: lens of statistical modeling
 
