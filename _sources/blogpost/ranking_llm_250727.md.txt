@@ -129,23 +129,21 @@ Suppose we bet on a single event with binary outcomes, with ground-truth probabi
 The expected Brier Score of A is 
 
 $$
-1 - 0.6 \cdot (0.45−1)^2 + 0.4 \cdot (0.45−0)^2 = 1 - 0.2625 = 0.7375
+1 - [0.6 \cdot (0.45−1)^2 + 0.4 \cdot (0.45−0)^2] = 1 - 0.2625 = 0.7375
 $$   
 
 The expected Brier Score of B is 
 
 $$
-1 - 0.6 \cdot (0.9 - 1)^2 + 0.4 \cdot (0.9−0)^2 = 1 - 0.33 = 0.67
+1 - [0.6 \cdot (0.9 - 1)^2 + 0.4 \cdot (0.9−0)^2] = 1 - 0.33 = 0.67
 $$   
 
 So A has a higher Brier Score. However, because A predicts 0.45, lower than the 0.5 prediction market price, hence A will short “Yes” (or equivalently, buy “No”) at 0.5. Meanwhile, B predicts 0.9, much higher than the prediction market price, hence they will buy “Yes.” Respectively, A and B’s expected return will be 
 
-$$
 \begin{align*}
 0.6 \cdot (−1+0.5) + 0.4 \cdot (0.5) &= −0.1 \\
 0.6 \cdot (1−0.5) + 0.4 \cdot (−0.5) &= 0.1
 \end{align*}
-$$
 
 In this example, A has a higher Brier Score, but lower returns. 
 

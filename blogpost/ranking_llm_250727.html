@@ -219,20 +219,18 @@ AVER := \frac{\sum_{i=1}^{N} \text{payoff from } i\text{-th } \text{event under 
 <p>Suppose we bet on a single event with binary outcomes, with ground-truth probability of “Yes” being 0.6 (for the event to be realized), and prediction market price 0.5. Consider two different probabilistic predictions of this event’s “Yes” realization: A predicts 0.45 and B predicts 0.9.</p>
 <p>The expected Brier Score of A is</p>
 <p>$$
-1 - 0.6 \cdot (0.45−1)^2 + 0.4 \cdot (0.45−0)^2 = 1 - 0.2625 = 0.7375
+1 - [0.6 \cdot (0.45−1)^2 + 0.4 \cdot (0.45−0)^2] = 1 - 0.2625 = 0.7375
 $$</p>
 <p>The expected Brier Score of B is</p>
 <p>$$
-1 - 0.6 \cdot (0.9 - 1)^2 + 0.4 \cdot (0.9−0)^2 = 1 - 0.33 = 0.67
+1 - [0.6 \cdot (0.9 - 1)^2 + 0.4 \cdot (0.9−0)^2] = 1 - 0.33 = 0.67
 $$</p>
 <p>So A has a higher Brier Score. However, because A predicts 0.45, lower than the 0.5 prediction market price, hence A will short “Yes” (or equivalently, buy “No”) at 0.5. Meanwhile, B predicts 0.9, much higher than the prediction market price, hence they will buy “Yes.” Respectively, A and B’s expected return will be</p>
-<p>$$</p>
 <div class="amsmath math notranslate nohighlight">
 \[\begin{align*}
 0.6 \cdot (−1+0.5) + 0.4 \cdot (0.5) &amp;= −0.1 \\
 0.6 \cdot (1−0.5) + 0.4 \cdot (−0.5) &amp;= 0.1
 \end{align*}\]</div>
-<p>$$</p>
 <p>In this example, A has a higher Brier Score, but lower returns.</p>
 <p>This example uncovers a key difference between the above two metrics. The Brier Score measures how close a prediction is to the ground truth and, importantly, has nothing to do with the market prices. Since A’s prediction above is closer to the ground truth, it receives a higher Brier Score. However, returns on the market are not only driven by the true probability but also the market price. Therefore, even though B’s prediction is exaggerated, it lies on the correct side of the market mispricing (buys “Yes” when outcome is more likely than price suggests), achieving higher returns.</p>
 </section>
