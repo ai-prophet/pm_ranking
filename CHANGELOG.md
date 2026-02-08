@@ -1,6 +1,23 @@
 ## CHANGELOG FOR PM-RANK VERSIONS
 
-### v0.2.27 (Current)
+### v0.3.1 (Current)
+
+- Anri fixed some bugs with the new average return algorithm.
+
+### v0.3.0
+
+- We now start to adopt a new algorithm for calculating the average return.
+
+### v0.2.33
+
+- Add more information when ranking the forecasters by Brier score or market return.
+
+### v0.2.28
+
+- Add the algorithm to calculate Sharpe ratio.
+- Add streaming and categorization support.
+
+### v0.2.27
 
 - Add better handling logic for calculating each submission/prediction's time to the market close timestamp.
 
